@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>Cart_Query</comment>
+	<!-- 장바구니의 모든 상품 리스트 -->
+	<!-- 장바구니 버튼 눌렀을때 담긴 모든 상품이 보이는 구문이에요! -->
+	<!-- 전체상품구매 버튼 눌렀을때 담긴 모든 상품이 주문페이지로 넘어갈 수 있도록 동일하게 사용합니다. -->
+	<entry key="cartAcList">
+		SELECT CART_NO
+		, STR_NAME
+		, P.CATEGORY_NAME
+		, C.PRODUCT_NO
+		, P.PRODUCT_NAME
+		, P.PRODUCT_PRICE
+		, AMOUNT  
+		, TOTAL_PRICE
+		, P.DELIVERY_FEE
+		, E_DATE
+		, MEM_ID
+		, MEM_FLAG
+		, CART_DATE
+		, C.STATUS
+		FROM CART C
+		JOIN MASTER M ON (C.MASTER_NO=M.MASTER_NO)
+		JOIN PRODUCT P ON (C.PRODUCT_NO=P.PRODUCT_NO)
+		WHERE C.STATUS = 'Y'
+		AND MEM_ID = ?
+		AND P.CATEGORY_NAME = '0.체험'
+		ORDER BY C.MASTER_NO
+	</entry>
+	<entry key="cartMdList">
+		SELECT CART_NO
+		, STR_NAME
+		, P.CATEGORY_NAME
+		, C.PRODUCT_NO
+		, P.PRODUCT_NAME
+		, P.PRODUCT_PRICE
+		, AMOUNT  
+		, TOTAL_PRICE
+		, P.DELIVERY_FEE
+		, E_DATE
+		, MEM_ID
+		, MEM_FLAG
+		, CART_DATE
+		, C.STATUS
+		FROM CART C
+		JOIN MASTER M ON (C.MASTER_NO=M.MASTER_NO)
+		JOIN PRODUCT P ON (C.PRODUCT_NO=P.PRODUCT_NO)
+		WHERE C.STATUS = 'Y'
+		AND MEM_ID = ?
+		AND NOT P.CATEGORY_NAME = '0.체험'
+		ORDER BY C.MASTER_NO
+	</entry>
+	<!-- 선택한 상품만 가져가도록 -->
+	<!-- 선택상품 주문 버튼 눌렀을때 선택한 상품의 내용만 주문서로 넘어갈 수 있도록 -->
+	<entry key="selectCart">
+        SELECT CART_NO
+				, STR_NAME
+				, P.CATEGORY_NAME
+				, C.PRODUCT_NO
+				, P.PRODUCT_NAME
+				, P.PRODUCT_PRICE
+				, AMOUNT
+				, TOTAL_PRICE
+				, P.DELIVERY_FEE
+				, E_DATE
+				, MEM_ID
+				, MEM_FLAG
+				, CART_DATE
+				, C.STATUS
+		FROM CART C
+		JOIN MASTER M ON (C.MASTER_NO=M.MASTER_NO)
+		JOIN PRODUCT P ON (C.PRODUCT_NO=P.PRODUCT_NO)
+		WHERE C.STATUS = 'Y'
+		AND MEM_ID = ?
+		AND c.PRODUCT_NO = ?
+		ORDER BY C.MASTER_NO
+		<!-- 수정 -->
+	</entry>
+	<entry key="selectbuyList">
+		SELECT CART_NO
+		, STR_NAME
+		, p.CATEGORY_NAME
+		, C.PRODUCT_NO
+		, P.PRODUCT_NAME
+		, P.PRODUCT_PRICE
+		, AMOUNT  
+		, TOTAL_PRICE
+		, P.DELIVERY_FEE
+		, E_DATE
+		, MEM_ID
+		, MEM_FLAG
+		, CART_DATE
+		, C.STATUS
+		FROM CART C
+		JOIN MASTER M ON (C.MASTER_NO=M.MASTER_NO)
+		JOIN PRODUCT P ON (C.PRODUCT_NO=P.PRODUCT_NO)
+		WHERE C.STATUS = 'Y'
+		AND CART_NO = ?
+		ORDER BY C.MASTER_NO
+	</entry>
+	<!-- 회원 카트 추가  -->
+	<!-- 여기에 E_DATE 추가해서 구매자가 선택한 날짜만 넘어갈 수 있도록 -->
+	<entry key="insertMemCart">
+		INSERT INTO CART(CART_NO
+					   , MASTER_NO
+					   , PRODUCT_NO
+					   , AMOUNT
+					   , TOTAL_PRICE
+					   , MEM_ID
+					   , E_DATE
+					   , MEM_FLAG)
+                    VALUES (SEQ_CARTNO.NEXTVAL
+     <!--1 MASTER_NO  -->, (SELECT MASTER_NO
+							FROM PRODUCT
+							WHERE PRODUCT_NO = ?)
+    <!--2 PRODUCT_NO  -->, ?
+      	<!--3 AMOUNT  -->, ?
+   <!--4 TOTAL_PRICE  -->, ?
+        <!--5 MEM_ID  -->, ?
+        <!--6 E_DATE  -->, ?
+         				 , 'Y')
+	</entry>
+	
+	
+	<!-- 비회원 카트 추가  
+	<entry key="insertBememCart">
+	</entry>-->
+	<!-- 수량변경 -->
+	
+	<entry key="updateAmount">
+		UPDATE CART
+		SET AMOUNT = ?+AMOUNT
+			, TOTAL_PRICE = ?+TOTAL_PRICE
+			, CART_DATE = SYSDATE
+			, STATUS = 'Y'
+		WHERE PRODUCT_NO = ?
+		AND MEM_ID = ?
+	</entry>
+	<!-- 선택상품 삭제 버튼시 수량은 0으로 상태는 N으로 변경됩니다. -->
+	<!-- 추후 삭제 했던 상품을 상품페이지에서 다시 추가할 수도 있기 때문! -->
+	<entry key="deleteCart">
+		UPDATE CART
+		SET STATUS = 'N'
+			, AMOUNT = 0
+		WHERE CART_NO = ?
+	</entry>
+	<entry key="insertMdCart">
+	INSERT INTO CART(CART_NO
+					,MASTER_NO
+					,PRODUCT_NO
+					,AMOUNT
+					,TOTAL_PRICE
+					,E_DATE
+					,MEM_ID
+					,MEM_FLAG
+					,CART_DATE
+					,STATUS) VALUES(SEQ_CARTNO.NEXTVAL,?,?,?,?,DEFAULT,?,'Y',SYSDATE,'Y')
+	</entry>
+	
+<entry key="insertActivityCart">
+	INSERT INTO CART(CART_NO
+,MASTER_NO
+,PRODUCT_NO
+,AMOUNT
+,TOTAL_PRICE
+,E_DATE
+,MEM_ID
+,MEM_FLAG
+,CART_DATE
+,STATUS) VALUES(SEQ_CARTNO.NEXTVAL,?,?,?,?,?,?,'Y',SYSDATE,'Y')
+	</entry>
+	
+	<entry key="updateAmountCart">
+		UPDATE CART
+		SET AMOUNT = ?
+			, CART_DATE = SYSDATE
+            , TOTAL_PRICE = ?*(SELECT PRODUCT_PRICE FROM PRODUCT WHERE PRODUCT_NO = ?)
+			, STATUS = 'Y'
+		WHERE CART_NO = ?
+		AND MEM_ID = ?
+	</entry>
+	
+	<entry key="deleteOneCart">
+		 DELETE FROM CART WHERE CART_NO = ? AND MEM_ID = ?
+	</entry>
+</properties>

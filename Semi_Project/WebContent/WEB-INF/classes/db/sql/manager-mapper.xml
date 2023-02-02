@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectMemberListCount">
+		SELECT COUNT(MEM_NO) COUNT
+		FROM MEMBER
+	</entry>
+	
+	<entry key="selectMemberList">
+		SELECT *
+		FROM(
+		     SELECT ROWNUM RNUM,A.*
+		     FROM(
+		     	  SELECT M.MEM_NO
+		                ,MEM_NAME
+		                ,MEM_PHONE
+		                ,GRADE
+		                ,ENROLLDATE
+		                ,ENROLLFLAG
+		                ,S.ORDER_DATE
+		          FROM MEMBER M,(SELECT MAX(ORDER_NO) "ORDER_NO",MEM_NO,MAX(ORDER_DATE) "ORDER_DATE"
+		                         FROM MEMORDER
+		                         GROUP BY MEM_NO) S
+		          WHERE M.MEM_NO=S.MEM_NO(+)
+		          ORDER BY ENROLLDATE) A
+		    )
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectMemberListDesc">
+		SELECT *
+		FROM(
+		     SELECT ROWNUM RNUM,A.*
+		     FROM(
+		     	  SELECT M.MEM_NO
+		                ,MEM_NAME
+		                ,MEM_PHONE
+		                ,GRADE
+		                ,ENROLLDATE
+		                ,ENROLLFLAG
+		                ,S.ORDER_DATE
+		          FROM MEMBER M,(SELECT MAX(ORDER_NO) "ORDER_NO",MEM_NO,MAX(ORDER_DATE) "ORDER_DATE"
+		                         FROM MEMORDER
+		                         GROUP BY MEM_NO) S
+		          WHERE M.MEM_NO=S.MEM_NO(+)
+		          ORDER BY ENROLLDATE DESC) A
+		    )
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectMemberListRecent">
+		SELECT *
+		FROM(
+		     SELECT ROWNUM RNUM,A.*
+		     FROM(
+		     	  SELECT M.MEM_NO
+		                ,MEM_NAME
+		                ,MEM_PHONE
+		                ,GRADE
+		                ,ENROLLDATE
+		                ,ENROLLFLAG
+		                ,S.ORDER_DATE
+		          FROM MEMBER M,(SELECT MAX(ORDER_NO) "ORDER_NO",MEM_NO,MAX(ORDER_DATE) "ORDER_DATE"
+		                         FROM MEMORDER
+		                         GROUP BY MEM_NO) S
+		          WHERE M.MEM_NO=S.MEM_NO(+)
+		          ORDER BY ORDER_DATE DESC NULLS LAST) A
+		    )
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectOneMember">
+		SELECT M.MEM_NO,
+		       MEM_NAME,
+		       MEM_PHONE,
+		       GRADE,
+		       ENROLLDATE,
+		       ENROLLFLAG,
+		       ORDER_DATE
+		FROM MEMBER M,(SELECT MAX(ORDER_NO) "ORDER_NO",MEM_NO,MAX(ORDER_DATE) "ORDER_DATE"
+					   FROM MEMORDER
+					   GROUP BY MEM_NO) S
+		WHERE M.MEM_NO = S.MEM_NO(+)
+		AND MEM_NAME = ?
+		AND MEM_PHONE = ?
+	</entry>
+	
+	<entry key="selectMemberDetail">
+		SELECT MEM_NO,
+			   MEM_ID,
+			   MEM_PW,
+			   MEM_NAME,
+			   MEM_PHONE,
+			   MEM_EMAIL,
+			   MEM_ADDRESS,
+			   GRADE,
+			   ENROLLDATE,
+			   ENROLLFLAG,
+			   DELETEDATE
+		FROM MEMBER
+		WHERE MEM_NO = ?
+	</entry>
+	
+	<entry key="selectMasterDetail">
+		SELECT MASTER_NO,
+			   MEM_NO,
+			   CO_NAME,
+			   CO_NUMBER,
+			   CEO,
+			   CO_KIND,
+			   STR_NAME,
+			   MASTER_INTRO,
+			   STATUS
+		FROM MASTER
+		WHERE MEM_NO = ?
+	</entry>
+	
+	<entry key="updateGrade">
+		UPDATE MEMBER
+		SET GRADE = '장인'
+		WHERE MEM_NO = ?
+		AND ENROLLFLAG = 'Y'
+	</entry>
+	
+	<entry key="insertMaster">
+		INSERT INTO MASTER(MASTER_NO,
+						   MEM_NO,
+						   CO_NAME,
+						   CO_NUMBER,
+						   CEO,
+						   CO_KIND,
+						   STR_NAME,
+						   MASTER_INTRO)
+		VALUES (SEQ_MSTNO.NEXTVAL,
+				?,
+				?,
+				?,
+				?,
+				?,
+				?,
+				?)
+	</entry>
+	
+	<entry key="downGrade">
+		UPDATE MEMBER
+		SET GRADE = '일반'
+		WHERE MEM_NO = ?
+		AND ENROLLFLAG = 'Y'
+	</entry>
+	
+	<entry key="deleteMaster">
+		UPDATE MASTER
+		SET STATUS = 'N'
+		WHERE MEM_NO = ?
+	</entry>
+	
+	<entry key="selectMasterList">
+		SELECT MASTER_NO,
+			   MEM_NO,
+			   CO_NAME,
+			   CO_NUMBER,
+			   CEO,
+			   CO_KIND,
+			   STR_NAME,
+			   MASTER_INTRO,
+			   STATUS
+		FROM MASTER
+		WHERE MEM_NO = ?
+		ORDER BY MASTER_NO DESC
+	</entry>
+	
+	<entry key="deleteMember">
+		UPDATE MEMBER
+		SET ENROLLFLAG = 'N',
+		    DELETEDATE = SYSDATE
+		WHERE MEM_NO = ?
+		AND ENROLLFLAG = 'Y'
+	</entry>
+	
+	<entry key="updateMaster">
+		UPDATE MASTER
+		SET CO_NAME = ?,
+		    CO_NUMBER = ?,
+		    CEO = ?,
+		    CO_KIND = ?,
+		    STR_NAME = ?,
+		    MASTER_INTRO = ?
+		WHERE MASTER_NO = ?
+		AND STATUS = 'Y'
+	</entry>
+	
+	<entry key="selectReview">
+		SELECT ROWNUM RNUM,A.*
+		FROM
+		    (SELECT PRODUCT_BOARD_NO,
+		    		PRODUCT_NAME,
+		    		PRODUCT_BOARD_CONTENT,
+		    		PRODUCT_BOARD_DATE,
+		    		P.STATUS
+		    FROM PRODUCTBOARD P
+		    JOIN PRODUCT USING (PRODUCT_NO)
+		    WHERE MEM_NO = ?
+		    ORDER BY PRODUCT_BOARD_DATE DESC) A
+		WHERE ROWNUM BETWEEN 1 AND 3
+	</entry>
+	
+	<entry key="deleteReview">
+		UPDATE PRODUCTBOARD
+		SET STATUS = 'N'
+		WHERE PRODUCT_BOARD_NO = ?
+		AND STATUS = 'Y'
+	</entry>
+	
+	<entry key="selectOrderList">
+		SELECT ORDER_NO,
+			   PRODUCT_NAME,
+			   PRODUCT_COUNT,
+			   ORDER_STATUS
+		FROM ORDERDETAIL
+		JOIN PRODUCT USING (PRODUCT_NO)
+		JOIN MEMORDER USING (ORDER_NO)
+		WHERE ORDER_NO IN (
+		                    SELECT ORDER_NO
+		                    FROM
+		                        (SELECT ORDER_NO
+		                        FROM MEMORDER
+		                        WHERE MEM_NO = ?
+		                        ORDER BY ORDER_DATE DESC)
+		                    WHERE ROWNUM = 1)
+	</entry>
+	
+	<entry key="selectThreeBoardList">
+		SELECT ROWNUM RNUM,A.*
+		FROM
+		    (SELECT BOARD_NO,
+		    		MEM_NO,
+		    		BOARD_TITLE,
+		    		BOARD_CONTENT,
+		    		BOARD_ANSWER,
+		    		BOARD_DATE,
+		    		ANSWER_DATE,
+		    		BOARD_CATEGORY,
+		    		CO_NAME,
+		    		CO_NUMBER,
+		    		CEO,
+		    		CO_KIND,
+		    		STR_NAME,
+		    		MASTER_INTRO,
+		    		STATUS
+		    FROM BOARD
+		    WHERE MEM_NO = ?
+		    AND BOARD_CATEGORY IN ('LEVELUP','PERSONAL')
+		    ORDER BY DECODE(STATUS,'W',1),BOARD_NO DESC) A
+		WHERE ROWNUM BETWEEN 1 AND 3
+	</entry>
+	
+	<entry key="insertAnswer">
+		UPDATE BOARD
+		SET BOARD_ANSWER = ?,
+		    ANSWER_DATE = SYSDATE,
+		    STATUS = 'Y'
+		WHERE BOARD_NO = ?
+	</entry>
+	
+	<entry key="updateAnswer">
+		UPDATE BOARD
+		SET BOARD_ANSWER = ?,
+		    ANSWER_DATE = SYSDATE
+		WHERE BOARD_NO = ?
+	</entry>
+	
+	<entry key="selectOrderListCount">
+		SELECT COUNT(ORDER_DETAIL_NO) COUNT
+		FROM ORDERDETAIL
+	</entry>
+	
+	<entry key="selectAllOrderList">
+		SELECT *
+		FROM(
+		    SELECT ROWNUM RNUM,A.*
+		    FROM(
+		        SELECT ORDER_DETAIL_NO,
+		               PRODUCT_NAME,
+		               PRODUCT_COUNT,
+		               OD.PRODUCT_PRICE,
+		               ORDER_STATUS,
+		               OD.MEM_FLAG,
+		               RECIVER_NAME,
+		               RECIVER_PHONE
+		        FROM ORDERDETAIL OD
+		        JOIN PRODUCT USING (PRODUCT_NO)
+		        JOIN MEMORDER USING (ORDER_NO)
+		        ORDER BY ORDER_DETAIL_NO DESC) A
+		        )
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectBoardListCount">
+		SELECT COUNT(PRODUCT_BOARD_NO) "COUNT"
+		FROM PRODUCTBOARD
+		WHERE MEM_NO = ?
+	</entry>
+	
+	<entry key="selectBoardList">
+	SELECT ROWNUM RNUM,A.*
+		FROM
+		    (SELECT BOARD_NO,
+		    		MEM_NO,
+		    		BOARD_TITLE,
+		    		BOARD_CONTENT,
+		    		BOARD_ANSWER,
+		    		BOARD_DATE,
+		    		ANSWER_DATE,
+		    		BOARD_CATEGORY,
+		    		CO_NAME,
+		    		CO_NUMBER,
+		    		CEO,
+		    		CO_KIND,
+		    		STR_NAME,
+		    		MASTER_INTRO,
+		    		STATUS
+		    FROM BOARD
+		    WHERE MEM_NO = ?
+		    AND BOARD_CATEGORY IN ('LEVELUP','PERSONAL')
+		    ORDER BY DECODE(STATUS,'W',1),BOARD_NO DESC) A
+		WHERE ROWNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectReviewListCount">
+		SELECT COUNT(PRODUCT_BOARD_NO) COUNT
+		FROM PRODUCTBOARD
+		WHERE MEM_NO = ?
+	</entry>
+	
+	<entry key="selectReviewList">
+		SELECT *
+		FROM(
+		    SELECT ROWNUM RNUM,A.*
+		    FROM
+		        (SELECT PRODUCT_BOARD_NO,PRODUCT_NAME,PRODUCT_BOARD_CONTENT,PRODUCT_BOARD_DATE,P.STATUS
+		        FROM PRODUCTBOARD P
+		        JOIN PRODUCT USING (PRODUCT_NO)
+		        WHERE MEM_NO = ?
+		        ORDER BY PRODUCT_BOARD_DATE DESC) A
+		    )
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+</properties>

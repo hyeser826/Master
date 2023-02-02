@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	
+	
+<!-- 입금대기인 상태 조회 매소드명이랑 혼동될수있음 -->
+	<entry key="selectDeliveryBoard">
+			
+		SELECT		OD.ORDER_DETAIL_NO ,
+                    OD.PRODUCT_NO ,
+                    OD.ORDER_NO ,
+                    OD.PRODUCT_COUNT ,
+                    OD.PRODUCT_PRICE ,
+                    OD.ORDER_STATUS ,                    
+                    OD.EXPDATE ,
+                    OD.MEM_FLAG
+                  
+        FROM ORDERDETAIL OD ,PRODUCT P,MASTER M
+        WHERE 
+        OD.PRODUCT_NO=P.PRODUCT_NO
+        AND M.MASTER_NO =P.MASTER_NO
+      	AND M.MASTER_NO=?
+	</entry>
+	
+	<entry key="selectProductMasterNo">
+		     SELECT PRODUCT_NO
+                ,CATEGORY_NAME
+               , MASTER_NO
+               , PRODUCT_NAME
+               , PRODUCT_PRICE
+               , PRODUCT_DESCRIPTION
+               , PRODUCT_DATE
+               , PRODUCT_STOCK
+               , PRODUCT_HITS
+               , STATUS
+               , DELIVERY_FEE
+               , EXP_PERIOD
+    FROM PRODUCT
+	</entry>
+	
+	
+	
+	<!--아래는 입금대기에서결제완료NEW -->
+	<entry key="changeOrderStatus">
+       UPDATE 
+        (SELECT
+         OD.ORDER_STATUS 
+        FROM 
+        ORDERDETAIL OD
+        ,PRODUCT P
+        WHERE
+       OD.PRODUCT_NO=P.PRODUCT_NO
+       AND OD.ORDER_DETAIL_NO=?
+            )
+SET ORDER_STATUS = '결제완료'
+
+
+	</entry>
+	<!--아래는 결제완료에서상품준비중NEW -->
+		<entry key="changeOrderStatus2">
+   UPDATE 
+        (SELECT
+         OD.ORDER_STATUS 
+        FROM 
+        ORDERDETAIL OD
+        ,PRODUCT P
+        WHERE
+       OD.PRODUCT_NO=P.PRODUCT_NO
+       AND OD.ORDER_DETAIL_NO=?
+            )
+SET ORDER_STATUS = '상품준비중'
+	</entry>
+	
+	<!-- 아래는 상품준비중 상태를 배송완료 상태로 변경 NEW -->
+<entry key="changeOrderStatus3">
+ UPDATE 
+        (SELECT
+         OD.ORDER_STATUS 
+        FROM 
+        ORDERDETAIL OD
+        ,PRODUCT P
+        WHERE
+       OD.PRODUCT_NO=P.PRODUCT_NO
+       AND OD.ORDER_DETAIL_NO=?
+            )
+SET ORDER_STATUS = '배송완료'
+
+</entry>
+	
+<!-- 송장등록  -->
+<entry key="invoiceInsertEnroll">
+     INSERT INTO DELIVERY(
+                    ORDER_DETAIL_NO
+                    ,DELIVERY_INVOICE_NO
+                    ,DELIVERY_SHIP_DATE
+                    ,DELIVERY_PARCEL
+                    ,STATUS
+		     )VALUES
+		      (
+		      ?
+		      ,?
+		      ,SYSDATE,
+		      ?,
+		      'Y'
+			   )
+          
+
+</entry>
+
+
+<!-- 리스트조회 -->
+<entry key="selectDeliveryInvoiceList">
+select       DV.ORDER_DETAIL_NO
+                ,DV.DELIVERY_CATEGORY
+                ,DV.DELIVERY_INVOICE_NO
+                ,DV.DELIVERY_SHIPPING
+                ,DV.DELIVERY_SHIP_DATE
+                ,DV.DELIVERY_PARCEL
+                ,DV.STATUS
+                from DELIVERY DV,ORDERDETAIL OD
+                
+                WHERE  DV.ORDER_DETAIL_NO = OD.ORDER_DETAIL_NO
+                AND OD.ORDER_DETAIL_NO=?
+            
+
+</entry>
+
+
+
+<!--  딜리버리에서 송장 벨류값줄려고 ! -->
+<entry key="selectDeliveryInvoiceList2">
+	select       DV.ORDER_DETAIL_NO
+                ,DV.DELIVERY_CATEGORY
+                ,DV.DELIVERY_INVOICE_NO
+                ,DV.DELIVERY_SHIPPING
+                ,DV.DELIVERY_SHIP_DATE
+                ,DV.DELIVERY_PARCEL
+                ,DV.STATUS
+                from DELIVERY DV,ORDERDETAIL OD
+                
+                WHERE  DV.ORDER_DETAIL_NO = OD.ORDER_DETAIL_NO
+                
+            
+
+</entry>
+
+
+
+<!-- 아래는 결제완료로 업데이트 이후 서비스에서 결제완료 띄우기  -->	
+<entry key="selectchangeOrderStatus">
+	SELECT			OD.ORDER_DETAIL_NO ,
+                    OD.PRODUCT_NO ,
+                    OD.ORDER_NO ,
+                    OD.PRODUCT_COUNT ,
+                    OD.PRODUCT_PRICE ,
+                    OD.ORDER_STATUS ,                    
+                    OD.EXPDATE ,
+                    OD.MEM_FLAG
+                 
+        FROM ORDERDETAIL OD ,PRODUCT P,MASTER M
+        WHERE 
+        OD.PRODUCT_NO=P.PRODUCT_NO
+        AND M.MASTER_NO =P.MASTER_NO
+      	AND OD.ORDER_DETAIL_NO=?
+      	AND ORDER_STATUS ='결제완료'
+      	
+
+</entry>	
+
+<!-- 상품준비중으로 업데이트 이후 서비스에서 목록띄우기  -->
+<entry key="selectchangeOrderStatus2">
+	SELECT			OD.ORDER_DETAIL_NO ,
+                    OD.PRODUCT_NO ,
+                    OD.ORDER_NO ,
+                    OD.PRODUCT_COUNT ,
+                    OD.PRODUCT_PRICE ,
+                    OD.ORDER_STATUS ,                    
+                    OD.EXPDATE ,
+                    OD.MEM_FLAG
+                 
+        FROM ORDERDETAIL OD ,PRODUCT P,MASTER M
+        WHERE 
+        OD.PRODUCT_NO=P.PRODUCT_NO
+        AND M.MASTER_NO =P.MASTER_NO
+      	AND OD.ORDER_DETAIL_NO=?
+      	AND ORDER_STATUS ='상품준비중'
+      	
+
+</entry>
+
+
+
+<!--  아래는 '상품준비중'인 상태 select -->
+<entry key="selectProductReady">
+
+SELECT ORDER_DETAIL_NO ,
+            PRODUCT_NO ,
+            ORDER_NO ,
+            PRODUCT_COUNT ,
+            PRODUCT_PRICE ,
+            ORDER_STATUS ,
+            EXPDATE ,
+            MEM_FLAG  
+	FROM ORDERDETAIL
+WHERE ORDER_DETAIL_NO =?
+AND ORDER_STATUS='상품준비중'
+
+</entry>
+
+<!--  마스터 테이블에 장인번호 조회해오려고 전체 조회 -->
+<entry key ="selectMasterNo" >
+select MASTER_NO ,
+        MEM_NO ,
+        CO_NAME ,
+        CO_NUMBER ,
+        CEO ,
+        CO_KIND ,
+        STR_NAME ,
+        MASTER_INTRO ,
+        STATUS 
+from master
+where MEM_NO= ?
+</entry>
+
+
+<!-- 아래는 오더디테일 전체조회 -->
+<entry key="selectOrderDetailNo">
+SELECT  OD.ORDER_DETAIL_NO ,
+            OD.PRODUCT_NO ,
+            OD.ORDER_NO ,
+            OD.PRODUCT_COUNT ,
+            OD.PRODUCT_PRICE ,
+            OD.ORDER_STATUS ,
+            OD.EXPDATE ,
+            OD.MEM_FLAG  
+        FROM ORDERDETAIL OD ,MEMORDER MO
+WHERE OD.ORDER_NO = MO.ORDER_NO
+AND MO.MEM_NO = ?
+
+</entry>
+
+<!-- 아래는RefuseOrder 결제완료에서 주문거절 상태로 업데이트   -->
+		<entry key="RefuseOrder">
+ UPDATE 
+        (SELECT
+         OD.ORDER_STATUS 
+        FROM 
+      	  ORDERDETAIL OD
+         ,PRODUCT P
+        WHERE
+        OD.PRODUCT_NO=P.PRODUCT_NO
+        AND P.MASTER_NO=?
+            )
+SET ORDER_STATUS = '주문취소'
+	</entry>
+	
+	
+	<!-- 오더디테일 중에서 주문거절 리스트 조회하기 (장인번호포함)-->
+	<entry key="selectRefuseOrderDetail">
+		SELECT		OD.ORDER_DETAIL_NO ,
+                    OD.PRODUCT_NO ,
+                    OD.ORDER_NO ,
+                    OD.PRODUCT_COUNT ,
+                    OD.PRODUCT_PRICE ,
+                    OD.ORDER_STATUS ,                    
+                    OD.EXPDATE ,
+                    OD.MEM_FLAG
+                  
+        FROM ORDERDETAIL OD ,PRODUCT P,MASTER M
+        WHERE 
+        OD.PRODUCT_NO=P.PRODUCT_NO
+        AND M.MASTER_NO =P.MASTER_NO
+      	AND M.MASTER_NO=? AND ORDER_STATUS ='주문취소'
+	</entry>
+
+	
+
+</properties>

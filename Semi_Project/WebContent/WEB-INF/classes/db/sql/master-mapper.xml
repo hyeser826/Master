@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="masterNumber">
+		SELECT MASTER_NO
+		FROM MEMBER
+		JOIN MASTER USING (MEM_NO)
+		WHERE MEM_NO=?
+	</entry>
+	<entry key="selectMst">
+		SELECT MASTER_NO
+		      ,MA.MEM_NO
+		      ,STR_NAME
+		      ,MASTER_INTRO
+		FROM MASTER MA
+		JOIN MEMBER ME ON (MA.MEM_NO=ME.MEM_NO)
+		WHERE MA.MEM_NO=?
+	</entry>
+	<entry key="updateMasterIntro">
+		UPDATE MASTER
+		SET MASTER_INTRO = ?
+		WHERE MASTER_NO = ?
+	</entry>
+</properties>

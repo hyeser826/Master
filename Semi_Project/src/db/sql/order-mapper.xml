@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectOrderList">
+		SELECT ORDER_NO,
+			   MEM_NO,
+			   PAY_NAME,
+			   ORDER_ADDRESS,
+			   RECIVER_NAME,
+			   RECIVER_PHONE,
+			   ORDER_DATE
+		FROM MEMORDER 
+		WHERE MEM_NO = ? 
+	</entry>
+
+	<entry key="selectOrderDetailList">
+		SELECT P.PRODUCT_NAME,
+		       OD.PRODUCT_PRICE,
+		       OD.PRODUCT_COUNT,
+		       OD.ORDER_STATUS,
+		 	   A.FILE_PATH || A.SYS_NAME "TITLEIMG"
+		FROM ORDERDETAIL OD
+		JOIN PRODUCT P ON (OD.PRODUCT_NO=P.PRODUCT_NO)
+		JOIN ATTACHMENT A ON (P.PRODUCT_NO=A.PRODUCT_NO)
+		WHERE A.FILE_LEVEL=1
+		AND OD.ORDER_NO = ?
+	</entry>
+	
+	<entry key="selectOrder">
+		SELECT  ORDER_NO
+		        ,MO.MEM_NO 
+		        ,M.MEM_NAME
+		        ,PAY_NAME
+		        ,ORDER_ADDRESS
+		        ,RECIVER_NAME
+		        ,RECIVER_PHONE
+		        ,ORDER_DATE
+		FROM MEMORDER MO
+		JOIN MEMBER M ON(MO.MEM_NO=M.MEM_NO)
+		WHERE ORDER_NO = ?
+	</entry>
+	
+	<entry key="selectOrderDetail">
+		SELECT  OD.ORDER_DETAIL_NO
+		        ,OD.PRODUCT_NO
+		        ,ORDER_NO
+		        ,OD.PRODUCT_COUNT
+		        ,OD.PRODUCT_PRICE  
+		        ,OD.ORDER_STATUS
+		        ,EXPDATE
+		        ,A.FILE_PATH || A.SYS_NAME "TITLEIMG"
+		        ,PRODUCT_NAME
+		        ,P.MASTER_NO
+		        ,DELIVERY_INVOICE_NO
+		        ,DELIVERY_PARCEL
+		        ,DELIVERY_SHIP_DATE
+		FROM ORDERDETAIL OD
+		JOIN PRODUCT P ON (OD.PRODUCT_NO=P.PRODUCT_NO)
+		JOIN ATTACHMENT A ON (P.PRODUCT_NO=A.PRODUCT_NO)
+		JOIN MASTER M ON (P.MASTER_NO=M.MASTER_NO)
+		JOIN DELIVERY D ON(OD.ORDER_DETAIL_NO=D.ORDER_DETAIL_NO)
+		WHERE ORDER_NO = ?
+		AND FILE_LEVEL = 1
+	</entry>
+	
+	<entry key="selectDelivery">
+		SELECT  ORDER_DETAIL_NO
+		        ,DELIVERY_CATEGORY
+		        ,DELIVERY_INVOICE_NO
+		        ,DELIVERY_SHIP_DATE
+		        ,DELIVERY_PARCEL
+		        ,STATUS
+		FROM DELIVERY D
+		WHERE ORDER_DETAIL_NO = ?
+	</entry>
+	
+	<entry key="chStatus">
+		UPDATE ORDERDETAIL
+		SET ORDER_STATUS = ?
+		WHERE ORDER_DETAIL_NO = ?
+	</entry>
+	<!-- 주문완료되어 새로운 주문서 생성되는 구문 -->
+	<entry key="insertNewOrder">
+		INSERT INTO MEMORDER(ORDER_NO
+						   , MEM_NO
+						   , PAY_NAME
+						   , ORDER_ADDRESS
+						   , RECIVER_NAME
+						   , RECIVER_PHONE
+						   , TOTAL_DEL)
+					  VALUES(SEQ_ORDERNO.NEXTVAL
+					  	   ,(SELECT MEM_NO 
+					  	   	 FROM MEMBER 
+					  	   	 WHERE MEM_ID=?)
+					  	   , '무통장입금'
+					  	   , ?
+					  	   , ?
+					  	   , ?
+					  	   , ?)
+	</entry>
+	<!-- 해당아이디로 가장 최근에 생성된 주문서 조회 -->
+	<!-- curval사용하지 않는 이유는 그사이에 다른 주문이 insert될 수 있음을 가정 -->
+	<entry key="selectCurOrderNo">
+		SELECT ORDER_NO
+		FROM (SELECT ROWNUM RNUM,A.* 
+              FROM (SELECT ORDER_NO
+                    FROM MEMORDER
+                    WHERE MEM_NO = (SELECT MEM_NO 
+                                    FROM MEMBER 
+                                    WHERE MEM_ID = ?)
+                    ORDER BY ORDER_NO DESC) A)
+    	WHERE RNUM = 1
+	</entry>
+	<entry key="insertWithOrderNo">
+	INSERT INTO ORDERDETAIL(ORDER_DETAIL_NO
+                          , PRODUCT_NO
+                          , ORDER_NO
+                          , PRODUCT_COUNT
+                          , PRODUCT_PRICE
+                          , ORDER_STATUS
+                          , EXPDATE
+                          , MEM_FLAG)
+					VALUES(SEQ_ODNO.NEXTVAL
+			              , (SELECT PRODUCT_NO FROM CART WHERE CART_NO = ?)
+			              , ?
+			              , (SELECT AMOUNT FROM CART WHERE CART_NO = ?)
+			              , ?
+			              , '입금대기'
+			              , (SELECT E_DATE FROM CART WHERE CART_NO = ?)
+			              , 'Y')
+    </entry>
+   	<!-- 가입자가 구매하기로 바로 주문시 -->
+   	<entry key="insertNewMOrder">
+   		INSERT INTO MEMORDER(ORDER_NO
+						   , MEM_NO
+						   , PAY_NAME
+						   , ORDER_ADDRESS
+						   , RECIVER_NAME
+						   , RECIVER_PHONE
+						   , TOTAL_DEL)
+					  VALUES(SEQ_ORDERNO.NEXTVAL
+					  	   ,(SELECT MEM_NO 
+					  	   	 FROM MEMBER 
+					  	   	 WHERE MEM_ID=?)
+					  	   , '무통장입금'
+					  	   , ?
+					  	   , ?
+					  	   , ?
+					  	   , ?)
+   	</entry>
+   	<!-- 비회원이 구매하기로 바로 주문시 -->
+   	<entry key="insertNewBOrder">
+   		INSERT INTO MEMORDER(ORDER_NO
+						   , MEM_NO
+						   , PAY_NAME
+						   , ORDER_ADDRESS
+						   , RECIVER_NAME
+						   , RECIVER_PHONE
+						   , TOTAL_DEL)
+					  VALUES(SEQ_ORDERNO.NEXTVAL
+					  	   , 0
+					  	   , '무통장입금'
+					  	   , ?
+					  	   , ?
+					  	   , ?
+					  	   , ?)
+   	</entry>
+   	<!-- 비회원이 구매하기로 바로 주문시 -->
+   	<entry key="bCurOrderNo">
+   	SELECT ORDER_NO
+	FROM (SELECT ROWNUM RNUM,A.* 
+          FROM (SELECT ORDER_NO
+                FROM MEMORDER
+                WHERE RECIVER_NAME = ?
+                AND RECIVER_PHONE = ?
+                ORDER BY ORDER_NO DESC) A)
+	WHERE RNUM = 1
+   	</entry>
+   	
+   	<entry key="insertBOrderDetail">
+	INSERT INTO ORDERDETAIL(ORDER_DETAIL_NO
+                          , PRODUCT_NO
+                          , ORDER_NO
+                          , PRODUCT_COUNT
+                          , PRODUCT_PRICE
+                          , ORDER_STATUS
+                          , MEM_FLAG)
+					VALUES(SEQ_ODNO.NEXTVAL
+			              , ?
+			              , ?
+			              , ?
+			              , ?
+			              , '입금대기'
+			              , 'N')
+    </entry>
+    <entry key="insertMOrderDetail">
+	INSERT INTO ORDERDETAIL(ORDER_DETAIL_NO
+                          , PRODUCT_NO
+                          , ORDER_NO
+                          , PRODUCT_COUNT
+                          , PRODUCT_PRICE
+                          , ORDER_STATUS
+                          , MEM_FLAG)
+					VALUES(SEQ_ODNO.NEXTVAL
+			              , ?
+			              , ?
+			              , ?
+			              , ?
+			              , '입금대기'
+			              , 'Y')
+    </entry>
+    <entry key="eventBOrderDetail">
+	INSERT INTO ORDERDETAIL(ORDER_DETAIL_NO
+                          , PRODUCT_NO
+                          , ORDER_NO
+                          , PRODUCT_COUNT
+                          , PRODUCT_PRICE
+                          , ORDER_STATUS
+                          , EXPDATE
+                          , MEM_FLAG)
+					VALUES(SEQ_ODNO.NEXTVAL
+			              , ?
+			              , ?
+			              , ?
+			              , ?
+			              , ?
+			              , '입금대기'
+			              , 'N')
+    </entry>
+    <entry key="eventMOrderDetail">
+	INSERT INTO ORDERDETAIL(ORDER_DETAIL_NO
+                          , PRODUCT_NO
+                          , ORDER_NO
+                          , PRODUCT_COUNT
+                          , PRODUCT_PRICE
+                          , ORDER_STATUS
+                          , EXPDATE
+                          , MEM_FLAG)
+					VALUES(SEQ_ODNO.NEXTVAL
+			              , ?
+			              , ?
+			              , ?
+			              , ?
+			              , ?
+			              , '입금대기'
+			              , 'Y')
+    </entry>
+</properties>

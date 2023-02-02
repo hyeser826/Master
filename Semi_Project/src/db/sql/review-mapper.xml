@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+
+	<entry key="insertBoardReview">
+	
+        INSERT INTO PRODUCTBOARD
+						 (PRODUCT_BOARD_NO,
+							PRODUCT_NO,
+							MEM_NO,
+							PRODUCT_BOARD_TITLE,
+							PRODUCT_BOARD_PWD,
+							PRODUCT_BOARD_CONTENT,
+							PRODUCT_BOARD_DATE,
+							PRODUCT_BOARD_HITS,
+							STATUS
+							)
+							VALUES 
+							(
+							SEQ_PQNO.NEXTVAL,
+							,SEQ_PNO.CURRVAL
+							,?
+							,?
+							,?
+							,?
+							SYSDATE
+							,1
+							,'Y'
+							)
+	</entry>
+
+	<entry key="insertAttachmentReview">
+	INSERT INTO ATTACHMENT(
+					ATTACHMENT_NO
+					,PRODUCT_NO
+					,FILE_NAME
+					,SYS_NAME
+					,FILE_LEVEL
+					,FILE_PATH
+				)
+		VALUES 
+		(
+		SEQ_FILENO.NEXTVAL,
+		?,
+		?,
+		?,
+		?,
+		?
+		)
+	</entry>
+	
+	<!--PRODUCTBOARD 조회하기 (유저넘버포함) -->
+	<entry key="selectReviewList">
+		SELECT 
+		PB.PRODUCT_BOARD_NO,
+		PB.PRODUCT_NO,
+		PB.MEM_NO,
+		PB.PRODUCT_BOARD_CONTENT,
+		PB.PRODUCT_BOARD_DATE,
+		PB.STATUS
+	
+		FROM PRODUCTBOARD PB
+        WHERE 
+        PB.MEM_NO=?
+        AND PRODUCT_BOARD_NO= ?
+        AND   PRODUCT_NO=?
+	</entry >
+	
+	<!-- 리뷰 삭제 N으로 update -->
+	<entry key="ReviewDelete">
+	 UPDATE
+            (SELECT PRODUCT_BOARD_NO ,
+                        PRODUCT_NO ,
+                        MEM_NO ,
+                        PRODUCT_BOARD_CONTENT ,
+                        PRODUCT_BOARD_DATE ,
+                        STATUS 
+            FROM PRODUCTBOARD
+            WHERE MEM_NO=?)
+    SET STATUS='N' 
+	
+	</entry>
+	
+	
+	
+
+	
+	<!-- 리뷰내용수정 -->
+	
+	
+<entry key="reviewModifyContent">
+UPDATE
+            (SELECT PRODUCT_BOARD_NO ,
+                        PRODUCT_NO ,
+                        MEM_NO ,
+                        PRODUCT_BOARD_CONTENT ,
+                        PRODUCT_BOARD_DATE ,
+                        STATUS 
+            FROM PRODUCTBOARD PB
+            WHERE PRODUCT_NO=?
+             AND PRODUCT_BOARD_NO= ?)
+    SET PRODUCT_BOARD_CONTENT=?
+	
+	</entry>
+
+<entry key="insertReview">
+		INSERT INTO PRODUCTBOARD(PRODUCT_BOARD_NO,
+								 PRODUCT_NO,
+								 MEM_NO,
+								 PRODUCT_BOARD_CONTENT,
+								 PRODUCT_BOARD_DATE,
+								 STATUS)
+		VALUES(SEQ_PQNO.NEXTVAL,
+			   ?,
+			   ?,
+			   ?,
+			   SYSDATE,
+			   'Y')
+	</entry>
+	
+	<entry key="selectProductReviewList">
+SELECT PRODUCT_BOARD_NO
+      ,MEM_ID
+      ,PRODUCT_BOARD_CONTENT
+      ,PRODUCT_BOARD_DATE
+
+        FROM PRODUCTBOARD B
+        JOIN MEMBER M USING(MEM_NO)
+        WHERE PRODUCT_NO = ?
+        AND B.STATUS = 'Y'
+        ORDER BY PRODUCT_BOARD_DATE DESC
+		
+	</entry>
+	
+</properties>

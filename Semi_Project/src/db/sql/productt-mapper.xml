@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="insertProduct">
+		INSERT INTO PRODUCT
+		VALUES(SEQ_PNO.NEXTVAL,
+			   ?,
+			   ?,
+			   ?,
+			   ?,
+			   ?,
+			   SYSDATE,
+			   ?,
+			   NULL,
+			   ?,
+			   ?,
+			   ?
+			   )
+					
+	</entry>
+	<entry key="insertAttachment">
+		INSERT INTO ATTACHMENT(ATTACHMENT_NO,
+							   PRODUCT_NO,
+							   FILE_NAME,
+							   SYS_NAME,
+							   FILE_PATH,
+							   FILE_LEVEL
+							   )
+					VALUES(SEQ_FILENO.NEXTVAL,
+						   SEQ_PNO.CURRVAL,
+						   ?,
+						   ?,
+						   ?,
+						   ?)
+	</entry>
+	<entry key="masterProductList">
+		SELECT *
+		FROM (
+		      SELECT ROWNUM RNUM,A.*      
+		      FROM	(
+		            SELECT PRODUCT_NO,
+		                   CATEGORY_NAME,
+		                   P.MASTER_NO,
+		                   PRODUCT_NAME,
+		                   PRODUCT_PRICE,
+		                   PRODUCT_DESCRIPTION,
+		                   PRODUCT_DATE,
+		                   PRODUCT_STOCK,
+		                   PRODUCT_HITS,
+		                   P.STATUS,
+		                   DELIVERY_FEE,
+		                   EXP_PERIOD
+		            FROM PRODUCT P
+		            JOIN MASTER MS ON(P.MASTER_NO=MS.MASTER_NO)
+		            JOIN MEMBER ME ON(MS.MEM_NO=ME.MEM_NO)
+		            WHERE ME.MEM_NO = ?
+		            ORDER BY PRODUCT_DATE DESC) A
+		           )
+		
+	</entry>
+	<entry key="selectProduct">
+		SELECT PRODUCT_NO,
+			   CATEGORY_NAME,
+			   MASTER_NO,
+		       PRODUCT_NAME,
+		       PRODUCT_PRICE,
+		       PRODUCT_DESCRIPTION,
+		       PRODUCT_DATE,
+		       PRODUCT_STOCK,
+		       STATUS,	
+		       DELIVERY_FEE,
+		       EXP_PERIOD
+		FROM PRODUCT
+		WHERE PRODUCT_NO = ?
+	</entry>
+	<entry key="selectAttachmentList">
+		SELECT  ATTACHMENT_NO,
+				PRODUCT_NO,
+		        FILE_NAME,
+		        SYS_NAME,
+		        FILE_PATH
+		FROM ATTACHMENT
+		WHERE PRODUCT_NO = ? 
+	</entry>
+
+	<entry key="updateProduct">
+		UPDATE PRODUCT
+		SET PRODUCT_NAME = ?,
+			CATEGORY_NAME = ?,
+			PRODUCT_PRICE = ?,
+			DELIVERY_FEE = ?,
+			PRODUCT_STOCK = ?,
+			PRODUCT_DESCRIPTION = ?,
+			STATUS = ?,
+			EXP_PERIOD = ?
+		WHERE PRODUCT_NO = ?
+	</entry>
+	<entry key="updateAttachment">
+		UPDATE ATTACHMENT
+		SET FILE_NAME = ?,
+			SYS_NAME = ?,
+			FILE_PATH = ?
+		WHERE ATTACHMENT_NO = ?
+	</entry>
+	<entry key="insertNewAttachment">
+		INSERT INTO ATTACHMENT(ATTACHMENT_NO
+						  ,PRODUCT_NO
+						  ,FILE_NAME
+						  ,SYS_NAME
+						  ,FILE_PATH)
+		VALUES (SEQ_FNO.NEXTVAL,?,?,?,?)
+	</entry>
+	<entry key="deleteProduct">
+		UPDATE PRODUCT
+		SET STATUS = 'N'
+		WHERE PRODUCT_NO = ?
+	</entry>
+</properties>

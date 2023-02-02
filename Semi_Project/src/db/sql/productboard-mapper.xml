@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	<entry key="insertProductBoard">
+				INSERT INTO PRODUCT_BOARD (
+                            P_NO "상품번호"
+                            ,MEM_NO "회원번호"
+                            ,PQ_CONTENT"문의내용"
+                            ,PQ_DATE "작성날짜"
+                            ,PQ_STATUS "게시글상태"
+                            )
+                            VALUES(
+                            CURR.VAL,
+                            ?,
+                            ?,
+                            SYSDATE,
+                            'Y')
+	</entry>
+	
+	<entry key="insertProductBoardAttachment">
+	     Insert into ATTACHMENT (
+                                ATTACHMENT_NO
+								,P_NO
+								,FILE_NAME
+								,SYS_NAME
+								,FILE_LEVEL
+								,FILE_PATH
+           )VALUES(
+          SEQ_FILENO.NEXTVAL
+          ,?
+          ,?
+          ,?
+          ,?
+          ,?
+          
+          )
+	</entry>
+	
+	<!--  아래는  장인 1:1문의 게시판PRODUCTBOARD -->
+	<entry key="masterinquired">
+	SELECT 
+		PB.PRODUCT_BOARD_NO,
+		PB.PRODUCT_NO,
+		PB.MEM_NO,
+		PB.PRODUCT_BOARD_CONTENT,
+		PB.PRODUCT_BOARD_DATE,
+		PB.STATUS
+	
+	FROM PRODUCTBOARD PB,PRODUCT P,MASTER M 
+       WHERE
+       PB.PRODUCT_NO = P.PRODUCT_NO
+       AND M.MASTER_NO=P.MASTER_NO
+  		AND PB.PRODUCT_BOARD_NO=?
+        AND P.MASTER_NO=?
+         AND PB.STATUS='Y'
+	</entry>
+	
+		<!-- 아래는 그냥 ProductBoard 조회 -->
+	<entry key="selectProductBoard">
+	SELECT 		PRODUCT_BOARD_NO ,
+                PRODUCT_NO ,
+                MEM_NO ,
+                PRODUCT_BOARD_CONTENT ,
+                PRODUCT_BOARD_DATE ,
+                STATUS  
+    FROM PRODUCTBOARD
+    WHERE MEM_NO =?
+    AND STATUS ='Y'
+	</entry>
+
+</properties>

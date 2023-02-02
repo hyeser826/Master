@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="selectRefundProduct">
+		SELECT ORDER_DETAIL_NO,
+				A.FILE_PATH || A.SYS_NAME "TITLEIMG",
+				PRODUCT_NAME,
+				P.PRODUCT_PRICE,
+				PRODUCT_COUNT,
+				DELIVERY_FEE,
+				STR_NAME,
+				ORDER_NO
+		FROM ORDERDETAIL
+		LEFT JOIN PRODUCT P USING (PRODUCT_NO)
+		JOIN ATTACHMENT A USING (PRODUCT_NO)
+		JOIN MASTER USING (MASTER_NO)
+		WHERE ORDER_DETAIL_NO = ?
+		AND FILE_LEVEL = 1
+	</entry>
+	
+	<entry key="insertRefund">
+		INSERT INTO REFUND(REFUND_NO,ORDER_DETAIL_NO,REFUND_REASON,REFUND_FLAG)
+		VALUES (SEQ_REFUNDNO.NEXTVAL,?,?,NULL)
+	</entry>
+	
+</properties>
